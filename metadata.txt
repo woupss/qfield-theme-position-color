@@ -3,5 +3,5 @@ name=Theme Position color
 description=Change the color of the position icon
 author=woupss
 icon=icon.svg
-version=0.1
+version=0.2
 homepage=qfield-theme-position-color
