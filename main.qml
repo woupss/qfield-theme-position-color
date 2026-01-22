@@ -3,6 +3,7 @@ import QtCore
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Dialogs
+import QtQuick.Shapes 
 import org.qfield
 import org.qgis
 import Theme
@@ -12,99 +13,99 @@ Item {
     id: plugin
     property var mainWindow: iface.mainWindow()
 
-    // --- TRADUCTIONS ---
+    // --- 1. TRADUCTIONS (Fusionnées Code 1 & 2) ---
     property string currentLang: Qt.locale().name.substring(0, 2)
     function tr(key) {
         var translations = {
-            // 1. & 2. Remplissage
+            // Section Position (Code 1)
             "pos_label":       { "en": "Fill",               "fr": "Remplissage" },
             "pos_desc":        { "en": "Arrow & Dot",        "fr": "Flèche & Point" },
-            
-            // 3. & 4. Bordures
             "stroke_label":    { "en": "Borders",            "fr": "Bordures" },
             "stroke_desc":     { "en": "Arrow & Dot",        "fr": "Flèche & Point" },
-            
-            // 5. Couleur Bordure
             "acc_border_c":    { "en": "Border Color",       "fr": "Couleur bordure" },
-            "acc_border_d":    { "en": "Accuracy circle",    "fr": "Cercle de précision" }, // inchangé
-
+            "acc_border_d":    { "en": "Accuracy circle",    "fr": "Cercle de précision" },
             "pos_tint":        { "en": "Position Settings",  "fr": "Réglages Position" },
             "reset":           { "en": "Reset",              "fr": "Réinitialiser" },
             "apply":           { "en": "Apply",              "fr": "Appliquer" },
-
-            // 6. Taille flèche (plus de description)
             "arrow_size":      { "en": "Arrow Size",         "fr": "Taille flèche" },
-            "arrow_s_desc":    { "en": "",                   "fr": "" },
-            
-            // 7. Épaisseur bordure de la Flèche
-            "arrow_w":         { "en": "Arrow Border Width", "fr": "Épaisseur bordure de la Flèche" },
-            "arrow_w_desc":    { "en": "",                   "fr": "" },
-            
-            // 8. Épaisseur bordure du Point
-            "dot_w":           { "en": "Dot Border Width",   "fr": "Épaisseur bordure du Point" },
-            "dot_w_desc":      { "en": "",                   "fr": "" },
-            
-            // 9. Épaisseur bordure du cercle de précision
-            "acc_w":           { "en": "Acc. Border Width",  "fr": "Épaisseur bordure du cercle de précision" },
-            "acc_w_desc":      { "en": "",                   "fr": "" },
-
-            // Ceux-ci n'ont pas été demandés à être modifiés, je les laisse
+            "arrow_w":         { "en": "Arrow Border Width", "fr": "Épaisseur bordure (flèche)" },
+            "dot_w":           { "en": "Dot Border Width",   "fr": "Épaisseur bordure (point)" },
+            "acc_w":           { "en": "Acc. Border Width",  "fr": "Épaisseur cercle" },
             "dot_size":        { "en": "Dot Size",           "fr": "Taille Point" },
             "dot_s_desc":      { "en": "Diameter",           "fr": "Diamètre" },
             
-            // Anciennes clés gardées pour compatibilité ou reset
-            "acc_high":        { "en": "Acc. (High)",        "fr": "Préc. (Excellente)" },
-            "acc_avg":         { "en": "Acc. (Avg.)",        "fr": "Préc. (Moyenne)" },
-            "acc_low":         { "en": "Acc. (Low)",         "fr": "Préc. (Faible)" },
-            "green_circ":      { "en": "Green circle",       "fr": "Cercle vert" },
-            "orange_circ":     { "en": "Orange circle",      "fr": "Cercle orange" },
-            "red_circ":        { "en": "Red circle",         "fr": "Cercle rouge" }
+            // Section Viseur / Crosshair (Code 2)
+            "cross_c":         { "en": "Crosshair Color",    "fr": "Couleur curseur" },
+            "cross_c_desc":    { "en": "Center line",        "fr": "Remplissage" },
+            "cross_b":         { "en": "Border Color",       "fr": "Couleur Bordure" },
+            "cross_b_desc":    { "en": "Outline",            "fr": "Bordure" },
+            "cross_s":         { "en": "Crosshair Size",     "fr": "Taille curseur de position" },
+            "cross_w":         { "en": "Crosshair Width",    "fr": "Épaisseur curseur de position" },
+            "cross_bw":        { "en": "Border Width",       "fr": "Épaisseur Bordure (curseur)" },
+            
+            // Onglets
+            "tab_pos":         { "en": "Position",           "fr": "Position" },
+            "tab_cross":       { "en": "Crosshair",          "fr": "Curseur de position" }
         }
         var t = translations[key];
         if (t) return (currentLang === "fr") ? t.fr : t.en;
         return key;
     }
 
-    // --- CONFIGURATION ---
+    // --- 2. CONFIGURATION (Structure améliorée du Code 2) ---
     property var positionColorConfig: ({
-        // --- COULEURS ---
-        "positionColor":           { "name": tr("pos_label"),    "desc": tr("pos_desc"),     "type": "color" },
-        "positionStrokeColor":     { "name": tr("stroke_label"), "desc": tr("stroke_desc"),  "type": "color" },
-        "accuracyBorderColor":     { "name": tr("acc_border_c"), "desc": tr("acc_border_d"), "type": "color" },
+        // GROUPE POS
+        "positionColor":           { "group": "pos", "name": tr("pos_label"),    "desc": tr("pos_desc"),     "type": "color" },
+        "positionStrokeColor":     { "group": "pos", "name": tr("stroke_label"), "desc": tr("stroke_desc"),  "type": "color" },
+        "accuracyBorderColor":     { "group": "pos", "name": tr("acc_border_c"), "desc": tr("acc_border_d"), "type": "color" },
+        "movementSize":            { "group": "pos", "name": tr("arrow_size"),   "desc": "", "type": "number", "min": 10, "max": 60, "step": 2 },
+        "movementStrokeWidth":     { "group": "pos", "name": tr("arrow_w"),      "desc": "", "type": "number", "min": 0, "max": 10, "step": 0.5 },
+        "positionMarkerSize":      { "group": "pos", "name": tr("dot_size"),     "desc": tr("dot_s_desc"),   "type": "number", "min": 5, "max": 40, "step": 1 },
+        "positionBorderWidth":     { "group": "pos", "name": tr("dot_w"),        "desc": "",   "type": "number", "min": 0, "max": 5, "step": 0.1 },
+        "accuracyBorderWidth":     { "group": "pos", "name": tr("acc_w"),        "desc": "",   "type": "number", "min": 0, "max": 5, "step": 0.1 },
         
-        // --- SLIDERS ---
-        "movementSize":            { "name": tr("arrow_size"),   "desc": tr("arrow_s_desc"), "type": "number", "min": 10, "max": 60, "step": 2 },
-        "movementStrokeWidth":     { "name": tr("arrow_w"),      "desc": tr("arrow_w_desc"), "type": "number", "min": 0, "max": 10, "step": 0.5 },
-        "positionMarkerSize":      { "name": tr("dot_size"),     "desc": tr("dot_s_desc"),   "type": "number", "min": 5, "max": 40, "step": 1 },
-        "positionBorderWidth":     { "name": tr("dot_w"),        "desc": tr("dot_w_desc"),   "type": "number", "min": 0, "max": 5, "step": 0.1 },
-        "accuracyBorderWidth":     { "name": tr("acc_w"),        "desc": tr("acc_w_desc"),   "type": "number", "min": 0, "max": 5, "step": 0.1 }
+        // GROUPE CROSS (Viseur)
+        "crosshairColor":          { "group": "cross", "name": tr("cross_c"),      "desc": tr("cross_c_desc"), "type": "color" },
+        "crosshairBorderColor":    { "group": "cross", "name": tr("cross_b"),      "desc": tr("cross_b_desc"), "type": "color" },
+        "crosshairSize":           { "group": "cross", "name": tr("cross_s"),      "desc": "", "type": "number", "min": 20, "max": 100, "step": 5 },
+        "crosshairWidth":          { "group": "cross", "name": tr("cross_w"),      "desc": "", "type": "number", "min": 1, "max": 10, "step": 0.5 },
+        "crosshairBorderWidth":    { "group": "cross", "name": tr("cross_bw"),     "desc": "", "type": "number", "min": 0, "max": 5, "step": 0.5 }
     })
 
     property var allKeys: Object.keys(positionColorConfig)
-    property var colorKeys: allKeys.filter(function(k){ return positionColorConfig[k].type === 'color' })
-    property var sliderKeys: allKeys.filter(function(k){ return positionColorConfig[k].type === 'number' })
+    
+    // Filtres pour les onglets
+    property var posColorKeys: allKeys.filter(function(k){ return positionColorConfig[k].group === 'pos' && positionColorConfig[k].type === 'color' })
+    property var posSliderKeys: allKeys.filter(function(k){ return positionColorConfig[k].group === 'pos' && positionColorConfig[k].type === 'number' })
+    
+    property var crossColorKeys: allKeys.filter(function(k){ return positionColorConfig[k].group === 'cross' && positionColorConfig[k].type === 'color' })
+    property var crossSliderKeys: allKeys.filter(function(k){ return positionColorConfig[k].group === 'cross' && positionColorConfig[k].type === 'number' })
     
     property var defaultColors: ({
         "positionColor": "#3388FF",           
         "positionStrokeColor": "#FFFFFF",
-        "accuracyExcellent": "#4CAF50",       
-        "accuracyTolerated": "#FF9800",       
-        "accuracyBad": "#F44336",
         "accuracyBorderColor": "#3388FF",
-        
         "movementSize": 26.0,
         "movementStrokeWidth": 3.0,
         "positionMarkerSize": 14.0,
         "positionBorderWidth": 2.0,
-        "accuracyBorderWidth": 0.7
+        "accuracyBorderWidth": 0.7,
+        "crosshairColor": "#000000",
+        "crosshairBorderColor": "#FFFFFF",
+        "crosshairSize": 48.0,
+        "crosshairWidth": 2.0,
+        "crosshairBorderWidth": 1.0
     })
 
     Settings {
         id: themeSettings
+        category: "PositionPlugin" // Ajout de la catégorie du Code 2 pour propreté
         property string jsonColors: "{}" 
     }
 
-    // --- LOGIQUE ---
+    // --- 3. LOGIQUE MÉTIER (Marker + Crosshair) ---
+    
+    // --- Logique Position (Marker) ---
     function findLocationMarker(parent) {
         if (!parent || !parent.children) return null;
         for (var i = 0; i < parent.children.length; i++) {
@@ -122,7 +123,6 @@ Item {
         var marker = findLocationMarker(mapCanvas);
         if (!marker) return;
 
-        // Racines
         if (key === "positionColor") marker.color = value;
         if (key === "positionStrokeColor") marker.strokeColor = value;
 
@@ -130,54 +130,99 @@ Item {
             var child = marker.children[i];
             try {
                 var childStr = child.toString();
-                var isRectangle = (childStr.indexOf("Rectangle") !== -1);
-                var isShape = (childStr.indexOf("Shape") !== -1);
+                var isPosMarker = (childStr.indexOf("Rectangle") !== -1 && child.hasOwnProperty("layer"));
+                var isMovementMarker = (childStr.indexOf("Shape") !== -1); 
 
-                var isPosMarker = (isRectangle && child.layer && child.layer.enabled);
-                var isAccMarker = (isRectangle && (!child.layer || !child.layer.enabled));
-                var isMovementMarker = isShape; 
-
-                // 1. Point de Position
                 if (isPosMarker) {
-                    if (key === "positionMarkerSize") {
-                        child.width = Number(value); child.height = Number(value); child.radius = Number(value) / 2;
-                    }
-                    if (key === "positionBorderWidth") child.border.width = Number(value);
-                    if (key === "positionStrokeColor") child.border.color = value;
-                }
-
-                // 2. Cercle de Précision
-                if (isAccMarker) {
-                    if (key === "accuracyBorderWidth") {
-                        if (child.border) child.border.width = Number(value);
-                    }
-                    if (key === "accuracyBorderColor") {
-                        if (child.border) child.border.color = value;
+                    if (child.layer && child.layer.enabled) { 
+                         if (key === "positionMarkerSize") { child.width = Number(value); child.height = Number(value); child.radius = Number(value) / 2; }
+                         if (key === "positionBorderWidth") child.border.width = Number(value);
+                         if (key === "positionStrokeColor") child.border.color = value;
+                    } else { 
+                         if (key === "accuracyBorderWidth" && child.border) child.border.width = Number(value);
+                         if (key === "accuracyBorderColor" && child.border) child.border.color = value;
                     }
                 }
-
-                // 3. Flèche
                 if (isMovementMarker) {
                     if (key === "movementSize") child.scale = Number(value) / 26.0;
-                    if (key === "movementStrokeWidth") {
-                        if (child.data) {
-                            for (var j = 0; j < child.data.length; j++) {
-                                if (child.data[j].strokeWidth !== undefined) child.data[j].strokeWidth = Number(value);
-                            }
-                        }
+                    if (key === "movementStrokeWidth" && child.data) {
+                        for (var j = 0; j < child.data.length; j++) 
+                            if (child.data[j].hasOwnProperty("strokeWidth")) child.data[j].strokeWidth = Number(value);
                     }
-                    if (key === "positionStrokeColor") {
-                         if (child.data) {
-                            for (var k = 0; k < child.data.length; k++) {
-                                if (child.data[k].strokeColor !== undefined) child.data[k].strokeColor = value;
-                            }
-                        }
+                    if (key === "positionStrokeColor" && child.data) {
+                        for (var k = 0; k < child.data.length; k++) 
+                            if (child.data[k].hasOwnProperty("strokeColor")) child.data[k].strokeColor = value;
                     }
                 }
             } catch(e) {}
         }
     }
 
+    // --- Logique Crosshair (Viseur) - Importé du Code 2 ---
+    function findLocatorItem(parent) {
+        if (!parent || !parent.children) return null;
+        for (var i = 0; i < parent.children.length; i++) {
+            var child = parent.children[i];
+            if (child.hasOwnProperty("snappingUtils") || child.toString().indexOf("Locator") !== -1) {
+                for(var j=0; j<child.children.length; j++) {
+                     if(child.children[j].toString().indexOf("Shape") !== -1) return child;
+                }
+            }
+            var res = findLocatorItem(child);
+            if (res) return res;
+        }
+        return null;
+    }
+
+    function updateCrosshair(key, value) {
+        if (key.indexOf("crosshair") === -1) return;
+
+        var locator = findLocatorItem(mainWindow.contentItem);
+        if (!locator) return;
+
+        var crosshairCircle = null;
+        for(var i=0; i<locator.children.length; i++) {
+            if(locator.children[i].toString().indexOf("Shape") !== -1) {
+                crosshairCircle = locator.children[i];
+                break;
+            }
+        }
+        if (!crosshairCircle) return;
+
+        if (key === "crosshairSize") {
+             crosshairCircle.width = Number(value);
+             crosshairCircle.height = Number(value);
+        }
+
+        var paths = crosshairCircle.data; 
+        var shapePaths = [];
+        for(var p=0; p<paths.length; p++) {
+            if(paths[p].toString().indexOf("ShapePath") !== -1) shapePaths.push(paths[p]);
+        }
+        
+        var bufferPath = null;
+        var mainPath = null;
+
+        if (shapePaths.length >= 2) {
+            bufferPath = shapePaths[0];
+            mainPath = shapePaths[1];
+        } else if (shapePaths.length === 1) {
+            mainPath = shapePaths[0];
+        }
+
+        if (mainPath && key === "crosshairColor") mainPath.strokeColor = value;
+        if (bufferPath && key === "crosshairBorderColor") bufferPath.strokeColor = value;
+        
+        if (key === "crosshairWidth" || key === "crosshairBorderWidth") {
+            var wMain = (key === "crosshairWidth") ? Number(value) : Number(getCurrentValue("crosshairWidth"));
+            var wBorder = (key === "crosshairBorderWidth") ? Number(value) : Number(getCurrentValue("crosshairBorderWidth"));
+            
+            if (mainPath) mainPath.strokeWidth = wMain;
+            if (bufferPath) bufferPath.strokeWidth = wMain + (wBorder * 2);
+        }
+    }
+
+    // --- Gestion des changements ---
     function applyChange(key, value) {
         try {
             if (key === undefined || key === "") return;
@@ -185,9 +230,13 @@ Item {
             var colorsObj = JSON.parse(currentJson);
             colorsObj[key] = value;
             
-            if (plugin.positionColorConfig[key].type === "color") Theme.applyColors(colorsObj); 
-            
+            if (plugin.positionColorConfig[key].type === "color" && Theme.hasOwnProperty(key)) {
+                Theme.applyColors(colorsObj); 
+            }
+            // Mise à jour des deux éléments
             updateLiveMarker(key, value);
+            updateCrosshair(key, value);
+            
             themeSettings.jsonColors = JSON.stringify(colorsObj);
         } catch (e) { console.log("Erreur application: " + e); }
     }
@@ -196,13 +245,15 @@ Item {
         var saved = JSON.parse(themeSettings.jsonColors || "{}")[key];
         if (saved !== undefined) return saved;
         var conf = plugin.positionColorConfig[key];
-        if (conf.type === "color") {
-            if (Theme[key]) return Theme[key].toString();
+        if (conf.type === "color" && Theme.hasOwnProperty(key)) {
+             return Theme[key].toString();
         }
         return plugin.defaultColors[key];
     }
 
-    // --- UI ---
+    // --- 4. INTERFACE UTILISATEUR ---
+
+    // Bouton Toolbar (Gardé du Code 1)
     QfToolButton {
         id: openColorsBtn
         iconSource: 'icon.svg'
@@ -212,6 +263,7 @@ Item {
         onClicked: positionColorDialog.open()
     }
 
+    // Dialogue (Structure améliorée avec Onglets du Code 2)
     Dialog {
         id: positionColorDialog
         modal: true
@@ -219,7 +271,8 @@ Item {
         parent: plugin.mainWindow.contentItem
         anchors.centerIn: parent 
         width: Math.min(500, parent.width * 0.95)
-
+        
+        // Background du Code 1 conservé (c'est le même style)
         background: Rectangle {
             color: Theme.mainBackgroundColor 
             radius: 8
@@ -228,179 +281,97 @@ Item {
         }
 
         contentItem: ColumnLayout {
+            id: mainLayout
             spacing: 0
             
-            // TITRE
+            // Titre
             Label {
                 text: plugin.tr("pos_tint")
                 font.bold: true; font.pixelSize: 18
                 color: Theme.mainTextColor 
                 Layout.alignment: Qt.AlignHCenter
                 Layout.topMargin: 2
-                Layout.bottomMargin: 10
+                Layout.bottomMargin: 5
             }
 
-            // CONTENU SCROLLABLE
-            ScrollView {
-                id: scrollView
+            // Onglets (Nouveauté Code 2)
+            TabBar {
+                id: bar
                 Layout.fillWidth: true
-                Layout.preferredHeight: Math.min(innerColumn.implicitHeight, plugin.mainWindow.height * 0.75)
-                clip: true
-                contentWidth: availableWidth
-                ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                Layout.bottomMargin: 10
+                TabButton { text: plugin.tr("tab_pos") }
+                TabButton { text: plugin.tr("tab_cross") }
+            }
 
-                ColumnLayout {
-                    id: innerColumn
-                    width: scrollView.availableWidth
-                    spacing: 15 
-
-                    // --- SECTION COULEURS ---
-                    GridLayout {
-                        Layout.fillWidth: true
-                        columns: 2
-                        columnSpacing: 10
-                        rowSpacing: 10
-
-                        Repeater {
-                            model: plugin.colorKeys
-                            delegate: Rectangle {
-                                Layout.fillWidth: true
-                                Layout.preferredHeight: 64
-                                color: "#259E9E9E" 
-                                border.color: Theme.controlBorderColor; border.width: 1; radius: 6
-
-                                property string key: modelData
-                                property var conf: plugin.positionColorConfig[key]
-                                property var val: plugin.getCurrentValue(key)
-
-                                RowLayout {
-                                    anchors.fill: parent
-                                    anchors.margins: 6
-                                    spacing: 2 
-
-                                    Rectangle {
-                                        width: 18; height: 18; radius: 9
-                                        color: val
-                                        border.color: Theme.controlBorderColor; border.width: 1
-                                        Layout.rightMargin: 4
-                                    }
-
-                                    ColumnLayout {
-                                        Layout.fillWidth: true
-                                        spacing: 0
-                                        Label { 
-                                            text: conf.name
-                                            font.bold: true; color: Theme.mainTextColor; font.pixelSize: 12
-                                            elide: Text.ElideRight; Layout.fillWidth: true
-                                        }
-                                        Label { 
-                                            text: conf.desc
-                                            color: Theme.secondaryTextColor; font.pixelSize: 10
-                                            elide: Text.ElideRight; Layout.fillWidth: true
-                                        }
-                                    }
-
-                                    Button {
-                                        display: AbstractButton.IconOnly
-                                        icon.source: "palette_icon.svg"
-                                        icon.color: Theme.mainTextColor
-                                        icon.width: 34; icon.height: 34 
-                                        Layout.preferredWidth: 40; Layout.preferredHeight: 40
-                                        background: Rectangle {
-                                            color: parent.down ? Theme.controlBackgroundColor : "transparent"
-                                            radius: 4
-                                        }
-                                        onClicked: colorPicker.open()
-                                    }
-                                }
-                                ColorDialog {
-                                    id: colorPicker
-                                    title: conf.name
-                                    selectedColor: val
-                                    options: ColorDialog.ShowAlphaChannel
-                                    onAccepted: plugin.applyChange(key, "" + selectedColor)
-                                }
-                            }
-                        }
-                    }
+            StackLayout {
+                id: stack
+                currentIndex: bar.currentIndex
+                Layout.fillWidth: true
+                // Hauteur dynamique selon l'onglet
+                Layout.preferredHeight: bar.currentIndex === 0 ? colPos.implicitHeight : colCross.implicitHeight
+                
+                // --- ONGLET 1 : POSITION ---
+                Item {
+                    // Contraint la hauteur pour le scroll
+                    implicitHeight: Math.min(colPos.implicitHeight, plugin.mainWindow.height * 0.6)
                     
-                    // --- SECTION SLIDERS ---
-                    ColumnLayout {
-                        Layout.fillWidth: true
-                        spacing: 8 
-
-                        Repeater {
-                            model: plugin.sliderKeys
-                            delegate: Rectangle {
-                                Layout.fillWidth: true
-                                Layout.preferredHeight: 70 
-                                color: "#259E9E9E"
-                                border.color: Theme.controlBorderColor; border.width: 1; radius: 6
-
-                                property string key: modelData
-                                property var conf: plugin.positionColorConfig[key]
-                                property var val: Number(plugin.getCurrentValue(key))
-
-                                ColumnLayout {
-                                    anchors.fill: parent
-                                    anchors.margins: 8 
-                                    spacing: 2
-                                    
-                                    RowLayout {
-                                        Layout.fillWidth: true
-                                        Label { 
-                                            // Affiche le nom, et la description seulement si elle n'est pas vide
-                                            text: conf.desc !== "" ? conf.name + " (" + conf.desc + ")" : conf.name
-                                            font.bold: true; color: Theme.mainTextColor; font.pixelSize: 13
-                                            Layout.fillWidth: true
-                                        }
-                                        Label {
-                                            text: val.toLocaleString(Qt.locale(), 'f', 1)
-                                            font.bold: true; color: Theme.mainTextColor
-                                        }
-                                    }
-
-                                    Slider {
-                                        id: sControl
-                                        Layout.fillWidth: true
-                                        from: conf.min; to: conf.max 
-                                        stepSize: conf.step
-                                        value: val
-
-                                        background: Rectangle {
-                                            x: sControl.leftPadding
-                                            y: sControl.topPadding + sControl.availableHeight / 2 - height / 2
-                                            width: sControl.availableWidth
-                                            height: 4
-                                            radius: 2
-                                            color: "#bdbebf"
-                                            Rectangle {
-                                                width: sControl.visualPosition * parent.width
-                                                height: parent.height; color: Theme.mainColor; radius: 2
-                                            }
-                                        }
-                                        handle: Rectangle {
-                                            x: sControl.leftPadding + sControl.visualPosition * (sControl.availableWidth - width)
-                                            y: sControl.topPadding + sControl.availableHeight / 2 - height / 2
-                                            width: 16; height: 16
-                                            radius: 8
-                                            color: sControl.pressed ? Qt.darker(Theme.mainColor, 1.1) : Theme.mainColor
-                                            border.color: "white"; border.width: 2
-                                        }
-                                        onMoved: plugin.applyChange(key, value)
-                                    }
-                                }
+                    ScrollView {
+                        anchors.fill: parent
+                        clip: true
+                        contentWidth: availableWidth
+                        ScrollBar.vertical.policy: ScrollBar.AsNeeded
+                        
+                        ColumnLayout {
+                            id: colPos
+                            width: parent.width
+                            spacing: 15 
+                            // Couleurs
+                            GridLayout {
+                                Layout.fillWidth: true; columns: 2; columnSpacing: 10; rowSpacing: 10
+                                Repeater { model: plugin.posColorKeys; delegate: colorDelegate }
+                            }
+                            // Sliders
+                            ColumnLayout {
+                                Layout.fillWidth: true; spacing: 8 
+                                Repeater { model: plugin.posSliderKeys; delegate: sliderDelegate }
                             }
                         }
                     }
-                    Item { Layout.fillWidth: true; Layout.preferredHeight: 5 }
+                }
+
+                // --- ONGLET 2 : VISEUR (CROSSHAIR) ---
+                Item {
+                    implicitHeight: Math.min(colCross.implicitHeight, plugin.mainWindow.height * 0.6)
+                    
+                    ScrollView {
+                        anchors.fill: parent
+                        clip: true
+                        contentWidth: availableWidth
+                        ScrollBar.vertical.policy: ScrollBar.AsNeeded
+                        
+                        ColumnLayout {
+                            id: colCross 
+                            width: parent.width
+                            spacing: 15 
+                            // Couleurs
+                            GridLayout {
+                                Layout.fillWidth: true; columns: 2; columnSpacing: 10; rowSpacing: 10
+                                Repeater { model: plugin.crossColorKeys; delegate: colorDelegate }
+                            }
+                            // Sliders
+                            ColumnLayout {
+                                Layout.fillWidth: true; spacing: 8 
+                                Repeater { model: plugin.crossSliderKeys; delegate: sliderDelegate }
+                            }
+                        }
+                    }
                 }
             }
 
-            // BOUTONS BAS
+            // Boutons Bas
             RowLayout {
                 Layout.fillWidth: true; Layout.alignment: Qt.AlignHCenter
-                Layout.topMargin: 0    
+                Layout.topMargin: 10    
                 Layout.bottomMargin: 2 
                 spacing: 20
                 Button {
@@ -409,7 +380,10 @@ Item {
                         themeSettings.jsonColors = "{}";
                         Theme.applyColors(plugin.defaultColors);
                         var keys = Object.keys(plugin.defaultColors);
-                        for(var i=0; i<keys.length; i++) plugin.updateLiveMarker(keys[i], plugin.defaultColors[keys[i]]);
+                        for(var i=0; i<keys.length; i++) {
+                            plugin.updateLiveMarker(keys[i], plugin.defaultColors[keys[i]]);
+                            plugin.updateCrosshair(keys[i], plugin.defaultColors[keys[i]]);
+                        }
                     }
                 }
                 Button {
@@ -421,6 +395,92 @@ Item {
         }
     }
 
+    // --- 5. COMPOSANTS RÉUTILISABLES (Code 2 clean) ---
+    
+    Component {
+        id: colorDelegate
+        Rectangle {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 64
+            color: "#259E9E9E" 
+            border.color: Theme.controlBorderColor; border.width: 1; radius: 6
+            property string key: modelData
+            property var conf: plugin.positionColorConfig[key]
+            property var val: plugin.getCurrentValue(key)
+
+            RowLayout {
+                anchors.fill: parent; anchors.margins: 6; spacing: 2 
+                Rectangle {
+                    width: 18; height: 18; radius: 9
+                    color: val
+                    border.color: Theme.controlBorderColor; border.width: 1
+                    Layout.rightMargin: 4
+                }
+                ColumnLayout {
+                    Layout.fillWidth: true; spacing: 0
+                    Label { text: conf.name; font.bold: true; color: Theme.mainTextColor; font.pixelSize: 12; elide: Text.ElideRight; Layout.fillWidth: true }
+                    Label { text: conf.desc; color: Theme.secondaryTextColor; font.pixelSize: 10; elide: Text.ElideRight; Layout.fillWidth: true }
+                }
+                Button {
+                    display: AbstractButton.IconOnly
+                    icon.source: "palette_icon.svg" // Assurez-vous d'avoir cette icône ou remettez celle par défaut
+                    icon.color: Theme.mainTextColor
+                    icon.width: 24; icon.height: 24
+                    Layout.preferredWidth: 40; Layout.preferredHeight: 40
+                    background: Rectangle { color: parent.down ? Theme.controlBackgroundColor : "transparent"; radius: 4 }
+                    onClicked: colorPicker.open()
+                }
+            }
+            ColorDialog {
+                id: colorPicker
+                title: conf.name
+                selectedColor: val 
+                options: ColorDialog.ShowAlphaChannel
+                onAccepted: plugin.applyChange(key, "" + selectedColor)
+            }
+        }
+    }
+
+    Component {
+        id: sliderDelegate
+        Rectangle {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 56
+            color: "#259E9E9E"
+            border.color: Theme.controlBorderColor; border.width: 1; radius: 6
+            property string key: modelData
+            property var conf: plugin.positionColorConfig[key]
+            property var val: Number(plugin.getCurrentValue(key))
+
+            ColumnLayout {
+                anchors.fill: parent; anchors.margins: 4; spacing: 0
+                RowLayout {
+                    Layout.fillWidth: true
+                    Label { text: conf.desc !== "" ? conf.name + " (" + conf.desc + ")" : conf.name; font.bold: true; color: Theme.mainTextColor; font.pixelSize: 13; Layout.fillWidth: true }
+                    Label { text: val.toLocaleString(Qt.locale(), 'f', 1); font.bold: true; color: Theme.mainTextColor }
+                }
+                Slider {
+                    id: sControl
+                    Layout.fillWidth: true; from: conf.min; to: conf.max; stepSize: conf.step; value: val
+                    background: Rectangle {
+                        x: sControl.leftPadding; y: sControl.topPadding + sControl.availableHeight / 2 - height / 2
+                        width: sControl.availableWidth; height: 4; radius: 2; color: "#bdbebf"
+                        Rectangle { width: sControl.visualPosition * parent.width; height: parent.height; color: Theme.mainColor; radius: 2 }
+                    }
+                    handle: Rectangle {
+                        x: sControl.leftPadding + sControl.visualPosition * (sControl.availableWidth - width)
+                        y: sControl.topPadding + sControl.availableHeight / 2 - height / 2
+                        width: 16; height: 16; radius: 8
+                        color: sControl.pressed ? Qt.darker(Theme.mainColor, 1.1) : Theme.mainColor
+                        border.color: "white"; border.width: 2
+                    }
+                    onMoved: plugin.applyChange(key, value)
+                }
+            }
+        }
+    }
+
+    // --- 6. INITIALISATION (Code 1 conservé) ---
     Component.onCompleted: {
         iface.addItemToPluginsToolbar(openColorsBtn);
         loadTimer.start();
@@ -435,7 +495,17 @@ Item {
                 var keys = Object.keys(c);
                 if(keys.length > 0) {
                     Theme.applyColors(c);
-                    for (var i = 0; i < keys.length; i++) plugin.updateLiveMarker(keys[i], c[keys[i]]);
+                    for (var i = 0; i < keys.length; i++) {
+                        plugin.updateLiveMarker(keys[i], c[keys[i]]);
+                        plugin.updateCrosshair(keys[i], c[keys[i]]);
+                    }
+                } else {
+                    // Application des défauts pour le Crosshair si aucune config n'existe
+                    var defKeys = Object.keys(plugin.defaultColors);
+                    for (var j = 0; j < defKeys.length; j++) {
+                       if (defKeys[j].indexOf("crosshair") !== -1)
+                           plugin.updateCrosshair(defKeys[j], plugin.defaultColors[defKeys[j]]);
+                    }
                 }
             } catch(e) {}
         }
