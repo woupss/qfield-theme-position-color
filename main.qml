@@ -58,8 +58,8 @@ Item {
         "positionColor":           { "group": "pos", "name": tr("pos_label"),    "desc": tr("pos_desc"),     "type": "color" },
         "positionStrokeColor":     { "group": "pos", "name": tr("stroke_label"), "desc": tr("stroke_desc"),  "type": "color" },
         "accuracyBorderColor":     { "group": "pos", "name": tr("acc_border_c"), "desc": tr("acc_border_d"), "type": "color" },
-        "movementSize":            { "group": "pos", "name": tr("arrow_size"),   "desc": "", "type": "number", "min": 10, "max": 60, "step": 2 },
-        "movementStrokeWidth":     { "group": "pos", "name": tr("arrow_w"),      "desc": "", "type": "number", "min": 0, "max": 10, "step": 0.5 },
+        "movementSize":            { "group": "pos", "name": tr("arrow_size"),   "desc": "", "type": "number", "min": 10, "max": 60, "step": 1 },
+        "movementStrokeWidth":     { "group": "pos", "name": tr("arrow_w"),      "desc": "", "type": "number", "min": 0, "max": 10, "step": 0.1 },
         "positionMarkerSize":      { "group": "pos", "name": tr("dot_size"),     "desc": tr("dot_s_desc"),   "type": "number", "min": 5, "max": 40, "step": 1 },
         "positionBorderWidth":     { "group": "pos", "name": tr("dot_w"),        "desc": "",   "type": "number", "min": 0, "max": 5, "step": 0.1 },
         "accuracyBorderWidth":     { "group": "pos", "name": tr("acc_w"),        "desc": "",   "type": "number", "min": 0, "max": 5, "step": 0.1 },
@@ -67,9 +67,9 @@ Item {
         // GROUPE CROSS (Viseur)
         "crosshairColor":          { "group": "cross", "name": tr("cross_c"),      "desc": tr("cross_c_desc"), "type": "color" },
         "crosshairBorderColor":    { "group": "cross", "name": tr("cross_b"),      "desc": tr("cross_b_desc"), "type": "color" },
-        "crosshairSize":           { "group": "cross", "name": tr("cross_s"),      "desc": "", "type": "number", "min": 20, "max": 100, "step": 5 },
-        "crosshairWidth":          { "group": "cross", "name": tr("cross_w"),      "desc": "", "type": "number", "min": 1, "max": 10, "step": 0.5 },
-        "crosshairBorderWidth":    { "group": "cross", "name": tr("cross_bw"),     "desc": "", "type": "number", "min": 0, "max": 5, "step": 0.5 }
+        "crosshairSize":           { "group": "cross", "name": tr("cross_s"),      "desc": "", "type": "number", "min": 20, "max": 100, "step": 2 },
+        "crosshairWidth":          { "group": "cross", "name": tr("cross_w"),      "desc": "", "type": "number", "min": 1, "max": 10, "step": 0.1 },
+        "crosshairBorderWidth":    { "group": "cross", "name": tr("cross_bw"),     "desc": "", "type": "number", "min": 0, "max": 5, "step": 0.1 }
     })
 
     property var allKeys: Object.keys(positionColorConfig)
@@ -85,16 +85,16 @@ Item {
         "positionColor": "#3388FF",           
         "positionStrokeColor": "#FFFFFF",
         "accuracyBorderColor": "#3388FF",
-        "movementSize": 26.0,
-        "movementStrokeWidth": 3.0,
-        "positionMarkerSize": 14.0,
-        "positionBorderWidth": 2.0,
+        "movementSize": 30.0,
+        "movementStrokeWidth": 1.8,
+        "positionMarkerSize": 15.0,
+        "positionBorderWidth": 1.7,
         "accuracyBorderWidth": 0.7,
         "crosshairColor": "#000000",
         "crosshairBorderColor": "#FFFFFF",
-        "crosshairSize": 48.0,
-        "crosshairWidth": 2.0,
-        "crosshairBorderWidth": 1.0
+        "crosshairSize": 50.0,
+        "crosshairWidth": 2.4,
+        "crosshairBorderWidth": 1.1
     })
 
     Settings {
@@ -104,7 +104,27 @@ Item {
     }
 
     // --- 3. LOGIQUE MÉTIER (Marker + Crosshair) ---
-    
+       // --- Logique button---
+    function findGnssButton(parent) {
+        if (!parent || !parent.children) return null;
+        for (var i = 0; i < parent.children.length; i++) {
+            var child = parent.children[i];
+            if (child.hasOwnProperty("followActive") && child.hasOwnProperty("autoRefollow")) return child;
+            var res = findGnssButton(child);
+            if (res) return res;
+        }
+        return null;
+    }
+
+    function updatePositionButton(key, value) {
+        if (key !== "positionColor") return;
+        var btn = findGnssButton(mainWindow.contentItem);
+        if (btn) {
+            btn.iconColor = Qt.binding(function() { return btn.followActive ? Theme.toolButtonColor : value });
+            btn.bgcolor = Qt.binding(function() { return btn.followActive ? value : Theme.toolButtonBackgroundColor });
+        }
+    }
+
     // --- Logique Position (Marker) ---
     function findLocationMarker(parent) {
         if (!parent || !parent.children) return null;
@@ -229,14 +249,10 @@ Item {
             var currentJson = themeSettings.jsonColors || "{}";
             var colorsObj = JSON.parse(currentJson);
             colorsObj[key] = value;
-            
-            if (plugin.positionColorConfig[key].type === "color" && Theme.hasOwnProperty(key)) {
-                Theme.applyColors(colorsObj); 
-            }
-            // Mise à jour des deux éléments
+            if (positionPluginRoot.positionColorConfig[key].type === "color" && Theme.hasOwnProperty(key)) Theme.applyColors(colorsObj); 
             updateLiveMarker(key, value);
             updateCrosshair(key, value);
-            
+            updatePositionButton(key, value);
             themeSettings.jsonColors = JSON.stringify(colorsObj);
         } catch (e) { console.log("Erreur application: " + e); }
     }
@@ -382,6 +398,8 @@ Item {
                         var keys = Object.keys(plugin.defaultColors);
                         for(var i=0; i<keys.length; i++) {
                             plugin.updateLiveMarker(keys[i], plugin.defaultColors[keys[i]]);
+
+plugin.updatePositionButton(keys[i], plugin.defaultColors[keys[i]]);
                             plugin.updateCrosshair(keys[i], plugin.defaultColors[keys[i]]);
                         }
                     }
@@ -497,6 +515,8 @@ Item {
                     Theme.applyColors(c);
                     for (var i = 0; i < keys.length; i++) {
                         plugin.updateLiveMarker(keys[i], c[keys[i]]);
+
+plugin.updatePositionButton(keys[i], c[keys[i]]);
                         plugin.updateCrosshair(keys[i], c[keys[i]]);
                     }
                 } else {
