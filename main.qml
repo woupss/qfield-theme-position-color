@@ -44,7 +44,9 @@ Item {
             
             // Onglets
             "tab_pos":         { "en": "Position",           "fr": "Position" },
-            "tab_cross":       { "en": "Crosshair",          "fr": "Curseur de position" }
+            "tab_cross":       { "en": "Crosshair",          "fr": "Curseur de position" },
+            "cancel":          { "en": "Cancel",             "fr": "Annuler" },
+"color_code":      { "en": "Color code",         "fr": "Code couleur" }
         }
         var t = translations[key];
         if (t) return (currentLang === "fr") ? t.fr : t.en;
@@ -519,7 +521,7 @@ Item {
                     ColumnLayout {
                         Layout.fillWidth: true
                         spacing: 3
-                        Label { text: "Code couleur"; font.pixelSize: 10; color: "#888" }
+                        Label { text: plugin.tr("color_code"); font.pixelSize: 10; color: "#888" }
                         TextField {
                             id: cwHexField
                             Layout.fillWidth: true
@@ -547,7 +549,7 @@ Item {
                     Layout.fillWidth: true
                     spacing: 10
                     Button {
-                        text: "Annuler"; Layout.fillWidth: true
+    text: plugin.tr("cancel"); Layout.fillWidth: true
                         background: Rectangle { color: parent.down ? "#ddd" : "#eee"; radius: 15; border.color: "#ccc"; border.width: 1 }
                         contentItem: Text { text: parent.text; color: "#333"; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                         onClicked: colorWheelPopup.close()
